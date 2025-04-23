@@ -1,20 +1,17 @@
 import 'package:chat_app/home/data/models/chat_model.dart';
-import 'package:chat_app/home/views/components/select_contact/components/button_card.dart';
 import 'package:chat_app/home/views/components/select_contact/components/contact_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'components/create_group.dart';
-
-class SelectContactView extends StatefulWidget {
-  const SelectContactView({super.key});
+class CreateGroupView extends StatefulWidget {
+  const CreateGroupView({super.key});
 
   @override
-  State<SelectContactView> createState() => _SelectContactViewState();
+  State<CreateGroupView> createState() => _CreateGroupViewState();
 }
 
-class _SelectContactViewState extends State<SelectContactView> {
-  List<ChatModel> chats = [
+class _CreateGroupViewState extends State<CreateGroupView> {
+  List<ChatModel> contacts = [
     ChatModel(
       name: 'John Doe',
       status: 'Im using WhatsApp',
@@ -27,7 +24,7 @@ class _SelectContactViewState extends State<SelectContactView> {
       icon: Icon(Icons.person),
     ),
   ];
-
+  List<ChatModel> selectedContacts = [];
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,7 +43,7 @@ class _SelectContactViewState extends State<SelectContactView> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                'Select Contact',
+                'New Group',
                 style: TextStyle(
                   fontSize: 20.sp,
                   color: Colors.white,
@@ -55,7 +52,7 @@ class _SelectContactViewState extends State<SelectContactView> {
               ),
 
               Text(
-                '234 contacts',
+                'Add participants ',
                 style: TextStyle(fontSize: 12, color: Colors.white),
               ),
             ],
@@ -67,44 +64,27 @@ class _SelectContactViewState extends State<SelectContactView> {
                 // Implement search functionality here
               },
             ),
-            PopupMenuButton(
-              icon: const Icon(Icons.more_vert, color: Colors.white),
-              itemBuilder:
-                  (context) => [
-                    const PopupMenuItem(
-                      value: 1,
-                      child: Text('Invite a friend'),
-                    ),
-                    const PopupMenuItem(value: 2, child: Text('Refresh')),
-                    const PopupMenuItem(value: 3, child: Text('contact us')),
-                    const PopupMenuItem(value: 4, child: Text('Help')),
-                  ],
-              onSelected: (value) {
-                print(value);
-              },
-            ),
           ],
         ),
         body: ListView.builder(
-          itemCount: chats.length + 2,
+          itemCount: contacts.length,
           itemBuilder: (context, index) {
-            if (index == 0) {
-              return InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => CreateGroupView()),
-                  );
-                },
-                child: ButtonCard(name: "New Group", icon: Icons.group),
-              );
-            } else if (index == 1) {
-              return ButtonCard(
-                name: "New Contact",
-                icon: Icons.person_add_alt_1_outlined,
-              );
-            }
-            return ContactCard(contact: chats[index - 2]);
+            return InkWell(
+              onTap: () {
+                if (contacts[index].isSelected == false) {
+                  setState(() {
+                    contacts[index].isSelected == true;
+                    selectedContacts.add(contacts[index]);
+                  });
+                } else {
+                  setState(() {
+                    contacts[index].isSelected == false;
+                    selectedContacts.remove(contacts[index]);
+                  });
+                }
+              },
+              child: ContactCard(contact: contacts[index]),
+            );
           },
         ),
       ),

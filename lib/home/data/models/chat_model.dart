@@ -5,6 +5,7 @@ class ChatModel {
   final dynamic icon;
   final bool? isGroup;
   final String? status;
+  final bool? isSelected;
 
   ChatModel({
     required this.name,
@@ -13,5 +14,6 @@ class ChatModel {
     required this.icon,
     this.isGroup,
     this.status,
+    this.isSelected = false,
   });
 }
