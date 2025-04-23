@@ -2,4 +2,4 @@
 
 A new Flutter project.
 
-Chat App Using Socket .io 
+Chat App Using Flutter ,Node JS and Socket .io 
