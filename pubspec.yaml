@@ -29,8 +29,10 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cupertino_icons: ^1.0.8
+  emoji_picker_flutter: ^4.3.0
   flutter:
     sdk: flutter
+
   flutter_screenutil: ^5.9.3
   marquee: ^2.3.0
 
