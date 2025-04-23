@@ -20,7 +20,10 @@ class ChatCard extends StatelessWidget {
       },
       child: ListTile(
         leading: CircleAvatar(
-          child: chatModel.isGroup ? Icon(Icons.groups) : Icon(Icons.person),
+          child:
+              chatModel.isGroup ?? false
+                  ? Icon(Icons.groups)
+                  : Icon(Icons.person),
         ),
         title: Text(
           chatModel.name,
@@ -35,12 +38,12 @@ class ChatCard extends StatelessWidget {
             const Icon(Icons.done_all, color: Colors.green, size: 16),
             SizedBox(width: 5.w),
             Text(
-              chatModel.message,
+              chatModel.message ?? 'No message',
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ],
         ),
-        trailing: Text(chatModel.time),
+        trailing: Text(chatModel.time ?? "-"),
       ),
     );
   }

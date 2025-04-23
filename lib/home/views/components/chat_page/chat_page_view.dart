@@ -1,6 +1,7 @@
 import 'package:chat_app/home/data/models/chat_model.dart';
 import 'package:flutter/material.dart';
 
+import '../select_contact/select_contact_view.dart';
 import 'components/chat_card.dart';
 
 class ChatPage extends StatefulWidget {
@@ -50,7 +51,10 @@ class _ChatPageState extends State<ChatPage> {
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
         onPressed: () {
-          // Add your action here
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const SelectContactView()),
+          );
         },
         backgroundColor: const Color(0xFF075E54),
         child: const Icon(Icons.chat, color: Colors.white),

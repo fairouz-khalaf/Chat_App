@@ -1,4 +1,5 @@
 import 'package:chat_app/home/data/models/chat_model.dart';
+import 'package:chat_app/home/views/components/individual_chat/components/bottom_sheet.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -193,7 +194,7 @@ class _IndividualChatViewState extends State<IndividualChatView> {
                                     onPressed: () {
                                       showModalBottomSheet(
                                         context: context,
-                                        builder: (build) => bottomSheet(),
+                                        builder: (build) => BottomSheetWidget(),
                                       );
                                     },
                                   ),
@@ -273,53 +274,4 @@ class _IndividualChatViewState extends State<IndividualChatView> {
       ),
     );
   }
-
-  Widget bottomSheet() => Container(
-    height: 200.h,
-    padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(20.r),
-        topRight: Radius.circular(20.r),
-      ),
-    ),
-    child: Column(
-      children: [
-        Row(
-          children: [
-            SizedBox(width: 20.w),
-            iconCreation(Icons.camera_alt, 'Camera', Colors.red),
-            SizedBox(width: 40.w),
-            iconCreation(Icons.image, 'Gallery', Colors.purple),
-            SizedBox(width: 40.w),
-            iconCreation(Icons.file_copy, 'Document', Colors.deepPurple),
-          ],
-        ),
-        SizedBox(height: 12.h),
-        Row(
-          children: [
-            SizedBox(width: 20.w),
-            iconCreation(Icons.location_on, 'Location', Colors.lightGreen),
-            SizedBox(width: 40.w),
-            iconCreation(Icons.person, 'Contact', Colors.blue),
-            SizedBox(width: 40.w),
-            iconCreation(Icons.mic, 'Audio', Colors.orange),
-          ],
-        ),
-      ],
-    ),
-  );
-  Widget iconCreation(IconData icon, String text, Color color) => Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      CircleAvatar(
-        backgroundColor: color,
-        radius: 30.r,
-        child: Icon(icon, size: 30.sp, color: Colors.white),
-      ),
-      SizedBox(height: 5.h),
-      Text(text, style: TextStyle(fontSize: 12.sp)),
-    ],
-  );
 }
