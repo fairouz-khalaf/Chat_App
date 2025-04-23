@@ -18,10 +18,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            fontFamily: 'OpenSans',
-            primaryColor: Color(0xFF075E54),
-          ),
+          theme: ThemeData(primaryColor: Color(0xFF075E54)),
           home: HomeView(),
         );
       },

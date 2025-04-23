@@ -227,6 +227,12 @@ class _IndividualChatViewState extends State<IndividualChatView> {
                   SizedBox(
                     height: 250.h,
                     child: EmojiPicker(
+                      onEmojiSelected: (category, emoji) {
+                        print(emoji);
+                        setState(() {
+                          textEditingController.text += emoji.emoji;
+                        });
+                      },
                       textEditingController: textEditingController,
                       config: Config(
                         height: 256,
