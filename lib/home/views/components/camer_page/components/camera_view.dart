@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'captured_image.dart';
+import 'video_view.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -14,6 +15,8 @@ class CameraView extends StatefulWidget {
 class _CameraViewState extends State<CameraView> {
   CameraController? _cameraController;
   Future<void>? cameraValue;
+  bool isRecording = false;
+  String videoPath = '';
 
   @override
   void initState() {
@@ -67,18 +70,61 @@ class _CameraViewState extends State<CameraView> {
                           // Add your flash action here
                         },
                       ),
-                      InkWell(
-                        onTap: () {},
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.panorama_fish_eye,
-                            color: Colors.white,
-                            size: 70,
-                          ),
-                          onPressed: () {
+                      GestureDetector(
+                        onLongPress: () async {
+                          try {
+                            await _cameraController?.startVideoRecording();
+                            setState(() {
+                              isRecording = true;
+                              videoPath = '';
+                            });
+                          } catch (e) {
+                            print("Error starting video: $e");
+                          }
+                        },
+                        onLongPressUp: () async {
+                          try {
+                            final XFile? recordedVideo =
+                                await _cameraController?.stopVideoRecording();
+
+                            if (recordedVideo != null) {
+                              setState(() {
+                                isRecording = false;
+                                videoPath = recordedVideo.path; // ✅ نحفظ المسار
+                              });
+
+                              if (context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) =>
+                                            VideoView(videoPath: videoPath),
+                                  ),
+                                );
+                              }
+                            }
+                          } catch (e) {
+                            print("Error stopping video: $e");
+                          }
+                        },
+                        onTap: () {
+                          if (!isRecording) {
                             takePhoto(context);
-                          },
-                        ),
+                          }
+                        },
+                        child:
+                            isRecording
+                                ? const Icon(
+                                  Icons.radio_button_on,
+                                  color: Colors.red,
+                                  size: 70,
+                                )
+                                : const Icon(
+                                  Icons.panorama_fish_eye,
+                                  color: Colors.white,
+                                  size: 70,
+                                ),
                       ),
                       IconButton(
                         icon: Icon(
