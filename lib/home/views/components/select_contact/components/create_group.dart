@@ -73,12 +73,12 @@ class _CreateGroupViewState extends State<CreateGroupView> {
               onTap: () {
                 if (contacts[index].isSelected == false) {
                   setState(() {
-                    contacts[index].isSelected == true;
+                    contacts[index].isSelected = true;
                     selectedContacts.add(contacts[index]);
                   });
                 } else {
                   setState(() {
-                    contacts[index].isSelected == false;
+                    contacts[index].isSelected = false;
                     selectedContacts.remove(contacts[index]);
                   });
                 }
