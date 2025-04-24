@@ -1,5 +1,5 @@
 import 'package:camera/camera.dart';
-import 'package:chat_app/home/views/components/individual_chat/components/camera_view.dart';
+import 'package:chat_app/home/views/components/camer_page/components/camera_view.dart';
 import 'package:chat_app/home/views/home_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

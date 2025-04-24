@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../individual_chat/components/camera_view.dart';
+import 'components/camera_view.dart';
 
 class CameraPageView extends StatefulWidget {
   const CameraPageView({super.key});

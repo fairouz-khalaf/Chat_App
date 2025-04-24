@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'captured_image.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -19,6 +20,12 @@ class _CameraViewState extends State<CameraView> {
     super.initState();
     _cameraController = CameraController(cameras[0], ResolutionPreset.high);
     cameraValue = _cameraController!.initialize();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _cameraController?.dispose();
   }
 
   @override
@@ -61,9 +68,7 @@ class _CameraViewState extends State<CameraView> {
                         },
                       ),
                       InkWell(
-                        onTap: () {
-                          // Add your camera action
-                        },
+                        onTap: () {},
                         child: IconButton(
                           icon: const Icon(
                             Icons.panorama_fish_eye,
@@ -71,7 +76,7 @@ class _CameraViewState extends State<CameraView> {
                             size: 70,
                           ),
                           onPressed: () {
-                            // Add your camera action
+                            takePhoto(context);
                           },
                         ),
                       ),
@@ -96,5 +101,22 @@ class _CameraViewState extends State<CameraView> {
         ],
       ),
     );
+  }
+
+  void takePhoto(BuildContext context) async {
+    try {
+      final XFile? image = await _cameraController?.takePicture();
+
+      if (image != null && context.mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CapturedImage(imagePath: image.path),
+          ),
+        );
+      }
+    } catch (e) {
+      print("Error taking photo: $e");
+    }
   }
 }
