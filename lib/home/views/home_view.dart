@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'components/camer_page/camera_page_view.dart';
 import 'components/chat_page/chat_page_view.dart';
 
 class HomeView extends StatefulWidget {
@@ -68,7 +69,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
       body: TabBarView(
         controller: _tabController,
         children: [
-          const Center(child: Text('Camera')),
+          CameraPageView(),
           ChatPage(),
           const Center(child: Text('Status')),
           const Center(child: Text('Calls')),
