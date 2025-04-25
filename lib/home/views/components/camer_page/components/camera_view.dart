@@ -16,6 +16,8 @@ class _CameraViewState extends State<CameraView> {
   CameraController? _cameraController;
   Future<void>? cameraValue;
   bool isRecording = false;
+  bool isFlashOn = false;
+  int selectedCameraIndex = 0;
   String videoPath = '';
 
   @override
@@ -60,16 +62,33 @@ class _CameraViewState extends State<CameraView> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       IconButton(
-                        icon: const Icon(
-                          Icons.flash_on,
+                        icon: Icon(
+                          isFlashOn ? Icons.flash_off : Icons.flash_on,
                           color: Colors.white,
-
                           size: 28,
                         ),
-                        onPressed: () {
-                          // Add your flash action here
+                        onPressed: () async {
+                          if (_cameraController != null) {
+                            try {
+                              if (isFlashOn) {
+                                await _cameraController!.setFlashMode(
+                                  FlashMode.off,
+                                );
+                              } else {
+                                await _cameraController!.setFlashMode(
+                                  FlashMode.torch,
+                                );
+                              }
+                              setState(() {
+                                isFlashOn = !isFlashOn;
+                              });
+                            } catch (e) {
+                              print("Error toggling flash: $e");
+                            }
+                          }
                         },
                       ),
+
                       GestureDetector(
                         onLongPress: () async {
                           try {
@@ -132,7 +151,9 @@ class _CameraViewState extends State<CameraView> {
                           size: 28,
                           color: Colors.white,
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          switchCamera();
+                        },
                       ),
                     ],
                   ),
@@ -163,6 +184,20 @@ class _CameraViewState extends State<CameraView> {
       }
     } catch (e) {
       print("Error taking photo: $e");
+    }
+  }
+
+  void switchCamera() async {
+    if (cameras.length > 1) {
+      selectedCameraIndex = selectedCameraIndex == 0 ? 1 : 0;
+
+      _cameraController = CameraController(
+        cameras[selectedCameraIndex],
+        ResolutionPreset.high,
+      );
+
+      cameraValue = _cameraController!.initialize();
+      setState(() {});
     }
   }
 }

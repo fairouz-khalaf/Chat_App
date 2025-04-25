@@ -37,8 +37,15 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
 }
 
 flutter {
     source = "../.."
 }
+
+
