@@ -1,11 +1,15 @@
+import 'package:flutter/material.dart';
+
 class ChatModel {
   final String name;
   final String? message;
   final String? time;
-  final dynamic icon;
+  final IconData icon;
   final bool? isGroup;
   final String? status;
+
   bool? isSelected;
+  final int? id;
 
   ChatModel({
     required this.name,
@@ -15,5 +19,6 @@ class ChatModel {
     this.isGroup,
     this.status,
     this.isSelected = false,
+    this.id,
   });
 }

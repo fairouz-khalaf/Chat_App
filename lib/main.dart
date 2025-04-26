@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:chat_app/home/views/components/camer_page/components/camera_view.dart';
 import 'package:chat_app/home/views/home_view.dart';
+import 'package:chat_app/login/views/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeData(primaryColor: Color(0xFF075E54)),
-          home: HomeView(),
+          home: LoginView(),
         );
       },
     );

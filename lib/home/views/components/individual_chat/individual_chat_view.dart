@@ -21,6 +21,7 @@ class _IndividualChatViewState extends State<IndividualChatView> {
   final TextEditingController textEditingController = TextEditingController();
   final FocusNode focusNode = FocusNode();
   late IO.Socket socket;
+  bool sendButton = false;
   @override
   void initState() {
     super.initState();
@@ -195,6 +196,17 @@ class _IndividualChatViewState extends State<IndividualChatView> {
                               textAlignVertical: TextAlignVertical.center,
                               maxLines: 6,
                               minLines: 1,
+                              onChanged: (value) {
+                                if (value.isNotEmpty) {
+                                  setState(() {
+                                    sendButton = true;
+                                  });
+                                } else {
+                                  setState(() {
+                                    sendButton = false;
+                                  });
+                                }
+                              },
                               keyboardType: TextInputType.multiline,
                               onTap: () {
                                 setState(() {
@@ -261,7 +273,10 @@ class _IndividualChatViewState extends State<IndividualChatView> {
                           backgroundColor: const Color(0xFF075E54),
                           radius: 22.r,
                           child: IconButton(
-                            icon: const Icon(Icons.mic, color: Colors.white),
+                            icon: Icon(
+                              sendButton ? Icons.send : Icons.mic,
+                              color: Colors.white,
+                            ),
                             onPressed: () {},
                           ),
                         ),

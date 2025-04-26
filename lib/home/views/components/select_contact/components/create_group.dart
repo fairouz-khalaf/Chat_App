@@ -17,13 +17,13 @@ class _CreateGroupViewState extends State<CreateGroupView> {
     ChatModel(
       name: 'John Doe',
       status: 'Im using WhatsApp',
-      icon: Icon(Icons.person),
+      icon: Icons.person,
     ),
-    ChatModel(name: 'Jane Smith', status: 'Im busy', icon: Icon(Icons.person)),
+    ChatModel(name: 'Jane Smith', status: 'Im busy', icon: Icons.person),
     ChatModel(
       name: 'Tarek Alaa',
       status: 'Im Flutter developer',
-      icon: Icon(Icons.person),
+      icon: Icons.person,
     ),
   ];
   List<ChatModel> selectedContacts = [];
