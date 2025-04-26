@@ -1,9 +1,12 @@
 import 'package:chat_app/home/data/models/chat_model.dart';
 import 'package:chat_app/home/views/components/individual_chat/components/bottom_sheet.dart';
+import 'package:chat_app/home/views/components/individual_chat/components/replay_message_card.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:marquee/marquee.dart';
+
+import 'components/own_message_card.dart';
 
 class IndividualChatView extends StatefulWidget {
   const IndividualChatView({super.key, required this.chatModel});
@@ -135,7 +138,13 @@ class _IndividualChatViewState extends State<IndividualChatView> {
             ),
             body: Column(
               children: [
-                Expanded(child: ListView()),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - 140.h,
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [OwnMessageCard(), const ReplyMessageCard()],
+                  ),
+                ),
                 Row(
                   children: [
                     SizedBox(
