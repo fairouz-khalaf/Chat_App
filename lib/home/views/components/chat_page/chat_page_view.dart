@@ -6,7 +6,8 @@ import 'components/chat_card.dart';
 
 class ChatPage extends StatefulWidget {
   final List<ChatModel> chats;
-  const ChatPage({super.key, required this.chats});
+  final ChatModel sourceChat;
+  const ChatPage({super.key, required this.chats, required this.sourceChat});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -30,7 +31,10 @@ class _ChatPageState extends State<ChatPage> {
       body: ListView.builder(
         itemCount: widget.chats.length,
         itemBuilder: (context, index) {
-          return ChatCard(chatModel: widget.chats[index]);
+          return ChatCard(
+            chatModel: widget.chats[index],
+            sourceChat: widget.sourceChat,
+          );
         },
       ),
     );

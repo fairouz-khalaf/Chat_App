@@ -1,332 +1,479 @@
 import 'package:chat_app/home/data/models/chat_model.dart';
-import 'package:chat_app/home/views/components/individual_chat/components/bottom_sheet.dart';
 import 'package:chat_app/home/views/components/individual_chat/components/replay_message_card.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:marquee/marquee.dart';
-import 'components/own_message_card.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
+import '../../../data/models/message_model.dart';
+import 'components/own_message_card.dart';
+
 class IndividualChatView extends StatefulWidget {
-  const IndividualChatView({super.key, required this.chatModel});
   final ChatModel chatModel;
+  final ChatModel sourceModel;
+
+  const IndividualChatView({
+    super.key,
+    required this.chatModel,
+    required this.sourceModel,
+  });
 
   @override
-  State<IndividualChatView> createState() => _IndividualChatViewState();
+  _IndividualChatViewState createState() => _IndividualChatViewState();
 }
 
 class _IndividualChatViewState extends State<IndividualChatView> {
-  bool showEmoji = false;
-  final TextEditingController textEditingController = TextEditingController();
-  final FocusNode focusNode = FocusNode();
-  late IO.Socket socket;
+  bool show = false;
+  FocusNode focusNode = FocusNode();
   bool sendButton = false;
+  List<MessageModel> messages = [];
+  TextEditingController textController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  late IO.Socket socket;
   @override
   void initState() {
     super.initState();
-    connect();
+    // connect();
+
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
         setState(() {
-          showEmoji = false;
+          show = false;
         });
       }
     });
+    connect();
   }
 
   void connect() {
-    socket = IO.io("http://172.21.112.1:5000", <String, dynamic>{
+    // MessageModel messageModel = MessageModel(sourceId: widget.sourceChat.id.toString(),targetId: );
+    socket = IO.io("http://192.168.0.106:5000", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
-
     socket.connect();
-
+    socket.emit("signin", widget.sourceModel.id);
     socket.onConnect((data) {
-      print("connected");
-      socket.emit("message", {"targetId": "123", "text": "hello from client"});
-      // هنا جوه الاتصال
+      print("Connected");
+      socket.on("message", (msg) {
+        print(msg);
+        setMessage("destination", msg["message"]);
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    });
+    print(socket.connected);
+  }
+
+  void sendMessage(String message, int sourceId, int targetId) {
+    setMessage("source", message);
+    socket.emit("message", {
+      "message": message,
+      "sourceId": sourceId,
+      "targetId": targetId,
+    });
+  }
+
+  void setMessage(String type, String message) {
+    MessageModel messageModel = MessageModel(
+      type: type,
+      message: message,
+      time: DateTime.now().toString().substring(10, 16),
+    );
+    print(messages);
+
+    setState(() {
+      messages.add(messageModel);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: SafeArea(
-        child: WillPopScope(
-          onWillPop: () {
-            if (showEmoji) {
-              setState(() {
-                showEmoji = false;
-              });
-              return Future.value(false);
-            }
-            return Future.value(true);
-          },
-          child: Scaffold(
-            backgroundColor: Colors.blueGrey.withAlpha(230),
-            appBar: AppBar(
-              leadingWidth: 90.w,
+    return Stack(
+      children: [
+        // Image.asset(
+        //   "assets/whatsapp_Back.png",
+        //   height: MediaQuery.of(context).size.height,
+        //   width: MediaQuery.of(context).size.width,
+        //   fit: BoxFit.cover,
+        // ),
+        Scaffold(
+          backgroundColor: Colors.lightGreen[50],
+          appBar: PreferredSize(
+            preferredSize: Size.fromHeight(60),
+            child: AppBar(
+              leadingWidth: 70,
               titleSpacing: 0,
-              backgroundColor: const Color(0xFF075E54),
               leading: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => Navigator.pop(context),
+                    Icon(Icons.arrow_back, size: 24),
+                    Icon(
+                      widget.chatModel.isGroup ?? false
+                          ? Icons.group
+                          : Icons.account_circle,
+                      size: 30,
+                      color: Colors.white,
                     ),
-                    const CircleAvatar(child: Icon(Icons.person)),
                   ],
                 ),
               ),
-              title: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.chatModel.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Colors.white,
+              title: InkWell(
+                onTap: () {},
+                child: Container(
+                  margin: EdgeInsets.all(6),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.chatModel.name,
+                        style: TextStyle(
+                          fontSize: 18.5,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 20.h,
-                      width: 200.w,
-                      child: Marquee(
-                        text: 'Last seen today at 2:30 PM',
-                        style: TextStyle(fontSize: 14, color: Colors.white),
-                        scrollAxis: Axis.horizontal,
-                        blankSpace: 20.0,
-                        velocity: 30.0,
-                        pauseAfterRound: Duration(seconds: 1),
-                        startPadding: 10.0,
-                        accelerationDuration: Duration(seconds: 1),
-                        accelerationCurve: Curves.linear,
-                        decelerationDuration: Duration(milliseconds: 500),
-                        decelerationCurve: Curves.easeOut,
+                      Text(
+                        "last seen today at 12:05",
+                        style: TextStyle(fontSize: 13),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.videocam, color: Colors.white),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.call, color: Colors.white),
-                  onPressed: () {},
-                ),
-                PopupMenuButton(
-                  icon: const Icon(Icons.more_vert, color: Colors.white),
-                  itemBuilder:
-                      (context) => [
-                        const PopupMenuItem(
-                          value: 1,
-                          child: Text('View Contact'),
-                        ),
-                        const PopupMenuItem(
-                          value: 2,
-                          child: Text('Media, Links, and Docs'),
-                        ),
-                        const PopupMenuItem(value: 3, child: Text('Search')),
-                        const PopupMenuItem(
-                          value: 4,
-                          child: Text('Mute Notifications'),
-                        ),
-                        const PopupMenuItem(value: 5, child: Text('Wallpaper')),
-                      ],
+                IconButton(icon: Icon(Icons.videocam), onPressed: () {}),
+                IconButton(icon: Icon(Icons.call), onPressed: () {}),
+                PopupMenuButton<String>(
+                  padding: EdgeInsets.all(0),
                   onSelected: (value) {
                     print(value);
+                  },
+                  itemBuilder: (BuildContext contesxt) {
+                    return [
+                      PopupMenuItem(
+                        value: "View Contact",
+                        child: Text("View Contact"),
+                      ),
+                      PopupMenuItem(
+                        value: "Media, links, and docs",
+                        child: Text("Media, links, and docs"),
+                      ),
+                      PopupMenuItem(
+                        value: "Whatsapp Web",
+                        child: Text("Whatsapp Web"),
+                      ),
+                      PopupMenuItem(value: "Search", child: Text("Search")),
+                      PopupMenuItem(
+                        value: "Mute Notification",
+                        child: Text("Mute Notification"),
+                      ),
+                      PopupMenuItem(
+                        value: "Wallpaper",
+                        child: Text("Wallpaper"),
+                      ),
+                    ];
                   },
                 ),
               ],
             ),
-            body: SingleChildScrollView(
+          ),
+          body: SizedBox(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: WillPopScope(
               child: Column(
                 children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height - 140.h,
-                    child: ListView(
+                  Expanded(
+                    // height: MediaQuery.of(context).size.height - 150,
+                    child: ListView.builder(
                       shrinkWrap: true,
-
-                      children: [
-                        OwnMessageCard(),
-                        const ReplyMessageCard(),
-                        OwnMessageCard(),
-                        const ReplyMessageCard(),
-                        OwnMessageCard(),
-                        const ReplyMessageCard(),
-                        OwnMessageCard(),
-                        const ReplyMessageCard(),
-                        OwnMessageCard(),
-                        const ReplyMessageCard(),
-                      ],
+                      controller: _scrollController,
+                      itemCount: messages.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == messages.length) {
+                          return Container(height: 70);
+                        }
+                        if (messages[index].type == "source") {
+                          return OwnMessageCard(
+                            message: messages[index].message,
+                            time: messages[index].time,
+                          );
+                        } else {
+                          return ReplyMessageCard(
+                            message: messages[index].message,
+                            time: messages[index].time,
+                          );
+                        }
+                      },
                     ),
                   ),
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width - 55.w,
-                        child: Card(
-                          margin: EdgeInsets.only(
-                            left: 5.w,
-                            right: 2.w,
-                            bottom: 8.h,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25.r),
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                            child: TextFormField(
-                              controller: textEditingController,
-                              focusNode: focusNode,
-                              textAlignVertical: TextAlignVertical.center,
-                              maxLines: 6,
-                              minLines: 1,
-                              onChanged: (value) {
-                                if (value.isNotEmpty) {
-                                  setState(() {
-                                    sendButton = true;
-                                  });
-                                } else {
-                                  setState(() {
-                                    sendButton = false;
-                                  });
-                                }
-                              },
-                              keyboardType: TextInputType.multiline,
-                              onTap: () {
-                                setState(() {
-                                  showEmoji = false;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Type a message ...',
-                                border: InputBorder.none,
-                                prefixIcon: IconButton(
-                                  icon: const Icon(
-                                    Icons.emoji_emotions_outlined,
-                                    color: Color(0xFF075E54),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      height: 70,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width - 60,
+                                child: Card(
+                                  margin: EdgeInsets.only(
+                                    left: 2,
+                                    right: 2,
+                                    bottom: 8,
                                   ),
-                                  onPressed: () {
-                                    FocusScope.of(context).unfocus();
-                                    Future.delayed(
-                                      const Duration(milliseconds: 100),
-                                      () {
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: TextFormField(
+                                    controller: textController,
+                                    focusNode: focusNode,
+                                    textAlignVertical: TextAlignVertical.center,
+                                    keyboardType: TextInputType.multiline,
+                                    maxLines: 5,
+                                    minLines: 1,
+                                    onChanged: (value) {
+                                      if (value.isNotEmpty) {
                                         setState(() {
-                                          showEmoji = !showEmoji;
+                                          sendButton = true;
                                         });
-                                      },
-                                    );
-                                  },
+                                      } else {
+                                        setState(() {
+                                          sendButton = false;
+                                        });
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: "Type a message",
+                                      hintStyle: TextStyle(color: Colors.grey),
+                                      prefixIcon: IconButton(
+                                        icon: Icon(
+                                          show
+                                              ? Icons.keyboard
+                                              : Icons.emoji_emotions_outlined,
+                                        ),
+                                        onPressed: () {
+                                          if (!show) {
+                                            focusNode.unfocus();
+                                            focusNode.canRequestFocus = false;
+                                          }
+                                          setState(() {
+                                            show = !show;
+                                          });
+                                        },
+                                      ),
+                                      suffixIcon: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          IconButton(
+                                            icon: Icon(Icons.attach_file),
+                                            onPressed: () {
+                                              showModalBottomSheet(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                context: context,
+                                                builder:
+                                                    (builder) => bottomSheet(),
+                                              );
+                                            },
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.camera_alt),
+                                            onPressed: () {
+                                              // Navigator.push(
+                                              //     context,
+                                              //     MaterialPageRoute(
+                                              //         builder: (builder) =>
+                                              //             CameraApp()));
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                      contentPadding: EdgeInsets.all(5),
+                                    ),
+                                  ),
                                 ),
-                                suffixIcon: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.attach_file,
-                                        color: Color(0xFF075E54),
-                                      ),
-                                      onPressed: () {
-                                        showModalBottomSheet(
-                                          context: context,
-                                          builder:
-                                              (build) => BottomSheetWidget(),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 8,
+                                  right: 2,
+                                  left: 2,
+                                ),
+                                child: CircleAvatar(
+                                  radius: 25,
+                                  backgroundColor: Color(0xFF128C7E),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      sendButton ? Icons.send : Icons.mic,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      if (sendButton) {
+                                        _scrollController.animateTo(
+                                          _scrollController
+                                              .position
+                                              .maxScrollExtent,
+                                          duration: Duration(milliseconds: 300),
+                                          curve: Curves.easeOut,
                                         );
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.camera_alt,
-                                        color: Color(0xFF075E54),
+                                        sendMessage(
+                                          textController.text,
+                                          widget.sourceModel.id ?? 0,
+                                          widget.chatModel.id ?? 0,
+                                        );
+                                        textController.clear();
+                                        setState(() {
+                                          sendButton = false;
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (show)
+                            SizedBox(
+                              height: 250.h,
+                              child: EmojiPicker(
+                                onEmojiSelected: (category, emoji) {
+                                  print(emoji);
+                                  setState(() {
+                                    textController.text += emoji.emoji;
+                                  });
+                                },
+                                textEditingController: textController,
+                                config: Config(
+                                  height: 256,
+                                  emojiViewConfig: EmojiViewConfig(
+                                    columns: 7,
+                                    emojiSizeMax:
+                                        32 *
+                                        (Theme.of(context).platform ==
+                                                TargetPlatform.iOS
+                                            ? 1.30
+                                            : 1.0),
+                                  ),
+                                  categoryViewConfig: const CategoryViewConfig(
+                                    backgroundColor: Colors.white,
+                                    indicatorColor: Color(0xFF075E54),
+                                    iconColorSelected: Color(0xFF075E54),
+                                  ),
+                                  bottomActionBarConfig:
+                                      const BottomActionBarConfig(
+                                        backgroundColor: Colors.white,
+                                        buttonColor: Color(0xFF075E54),
                                       ),
-                                      onPressed: () {},
-                                    ),
-                                  ],
+                                  searchViewConfig: const SearchViewConfig(
+                                    backgroundColor: Colors.white,
+
+                                    hintText: 'Search Emoji...',
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(
-                          bottom: 12.h,
-                          left: 5.w,
-                          right: 5.w,
-                        ),
-                        child: CircleAvatar(
-                          backgroundColor: const Color(0xFF075E54),
-                          radius: 22.r,
-                          child: IconButton(
-                            icon: Icon(
-                              sendButton ? Icons.send : Icons.mic,
-                              color: Colors.white,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (showEmoji)
-                    SizedBox(
-                      height: 250.h,
-                      child: EmojiPicker(
-                        onEmojiSelected: (category, emoji) {
-                          print(emoji);
-                          setState(() {
-                            textEditingController.text += emoji.emoji;
-                          });
-                        },
-                        textEditingController: textEditingController,
-                        config: Config(
-                          height: 256,
-                          emojiViewConfig: EmojiViewConfig(
-                            columns: 7,
-                            emojiSizeMax:
-                                32 *
-                                (Theme.of(context).platform ==
-                                        TargetPlatform.iOS
-                                    ? 1.30
-                                    : 1.0),
-                          ),
-                          categoryViewConfig: const CategoryViewConfig(
-                            backgroundColor: Colors.white,
-                            indicatorColor: Color(0xFF075E54),
-                            iconColorSelected: Color(0xFF075E54),
-                          ),
-                          bottomActionBarConfig: const BottomActionBarConfig(
-                            backgroundColor: Colors.white,
-                            buttonColor: Color(0xFF075E54),
-                          ),
-                          searchViewConfig: const SearchViewConfig(
-                            backgroundColor: Colors.white,
-
-                            hintText: 'Search Emoji...',
-                          ),
-                        ),
+                        ],
                       ),
                     ),
+                  ),
                 ],
               ),
+              onWillPop: () {
+                if (show) {
+                  setState(() {
+                    show = false;
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
+                return Future.value(false);
+              },
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget bottomSheet() {
+    return SizedBox(
+      height: 278,
+      width: MediaQuery.of(context).size.width,
+      child: Card(
+        margin: const EdgeInsets.all(18.0),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  iconCreation(
+                    Icons.insert_drive_file,
+                    Colors.indigo,
+                    "Document",
+                  ),
+                  SizedBox(width: 40),
+                  iconCreation(Icons.camera_alt, Colors.pink, "Camera"),
+                  SizedBox(width: 40),
+                  iconCreation(Icons.insert_photo, Colors.purple, "Gallery"),
+                ],
+              ),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  iconCreation(Icons.headset, Colors.orange, "Audio"),
+                  SizedBox(width: 40),
+                  iconCreation(Icons.location_pin, Colors.teal, "Location"),
+                  SizedBox(width: 40),
+                  iconCreation(Icons.person, Colors.blue, "Contact"),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget iconCreation(IconData icons, Color color, String text) {
+    return InkWell(
+      onTap: () {},
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 30,
+            backgroundColor: color,
+            child: Icon(
+              icons,
+              // semanticLabel: "Help",
+              size: 29,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 5),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              // fontWeight: FontWeight.w100,
+            ),
+          ),
+        ],
       ),
     );
   }

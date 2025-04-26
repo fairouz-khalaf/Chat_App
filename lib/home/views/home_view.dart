@@ -6,7 +6,8 @@ import 'components/chat_page/chat_page_view.dart';
 
 class HomeView extends StatefulWidget {
   final List<ChatModel> chats;
-  const HomeView({super.key, required this.chats});
+  final ChatModel sourceChat;
+  const HomeView({super.key, required this.sourceChat, required this.chats});
 
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -72,7 +73,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
         controller: _tabController,
         children: [
           CameraPageView(),
-          ChatPage(chats: widget.chats),
+          ChatPage(chats: widget.chats, sourceChat: widget.sourceChat),
           const Center(child: Text('Status')),
           const Center(child: Text('Calls')),
         ],

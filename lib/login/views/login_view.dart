@@ -1,5 +1,4 @@
 import 'package:chat_app/home/data/models/chat_model.dart';
-import 'package:chat_app/home/views/components/individual_chat/individual_chat_view.dart';
 import 'package:chat_app/home/views/components/select_contact/components/button_card.dart';
 import 'package:chat_app/home/views/home_view.dart';
 import 'package:flutter/material.dart';
@@ -53,7 +52,9 @@ class _LoginViewState extends State<LoginView> {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => HomeView(chats: chats),
+                    builder:
+                        (context) =>
+                            HomeView(chats: chats, sourceChat: sourceChat),
                   ),
                 );
               },
