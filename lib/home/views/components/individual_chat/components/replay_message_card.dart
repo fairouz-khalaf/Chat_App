@@ -13,9 +13,15 @@ class ReplyMessageCard extends StatelessWidget {
         ),
         child: Card(
           elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.only(
+              topRight: Radius.circular(12),
+              bottomRight: Radius.circular(12),
+              topLeft: Radius.circular(12),
+            ),
+          ),
           // color: Color(0xffdcf8c6),
-          margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+          margin: EdgeInsets.symmetric(horizontal: 5, vertical: 0),
 
           child: Stack(
             children: [

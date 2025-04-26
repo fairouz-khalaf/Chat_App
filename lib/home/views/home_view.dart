@@ -23,7 +23,7 @@ class _HomeViewState extends State<HomeView> with TickerProviderStateMixin {
     _tabController = TabController(
       length: tabs.length,
       vsync: this,
-      initialIndex: 0,
+      initialIndex: 1,
     );
     super.initState();
   }
